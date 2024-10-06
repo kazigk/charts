@@ -5,6 +5,9 @@ metadata:
   name: {{ include "unifi.fullname" . }}-init-mongodb
   labels:
     {{- include "unifi.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   ttlSecondsAfterFinished: 60
   template:
