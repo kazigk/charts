@@ -1,0 +1,69 @@
+{{- if .Values.mongodb.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "unifi.fullname" . }}-init-mongodb
+  labels:
+    {{- include "unifi.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "unifi.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "mongodb.imagePullSecrets" .Subcharts.mongodb | nindent 6 -}}
+      serviceAccountName: {{ include "unifi.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      restartPolicy: Never
+      containers:
+        - name: init-mongodb
+          image: {{ include "mongodb.image" .Subcharts.mongodb }}
+          imagePullPolicy: {{ .Values.mongodb.image.pullPolicy }}
+          env:
+            {{- include "unifi.commonEnv" . | nindent 12 }}
+            - name: MONGO_ROOT_USER
+              value: {{ .Values.mongodb.auth.rootUser }}
+            - name: MONGO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "unifi.mongoRootSecret" . }}
+                  key: mongodb-root-password
+          command:
+            - mongosh
+            - '--nodb'
+            - '--eval'
+            - |
+              print('Waiting until MongoDB is ready...');
+              let conn;
+              while (true) {
+                try {
+                  conn = new Mongo(process.env.MONGO_HOST + ':' + process.env.MONGO_PORT);
+                  break;
+                } catch (e) {
+                  print(e);
+                  sleep(1000);
+                }
+              }
+              conn.getDB('admin').auth(process.env.MONGO_ROOT_USER, process.env.MONGO_ROOT_PASSWORD);
+              const db = conn.getDB(process.env.MONGO_AUTHSOURCE);
+              if (!db.getUser(process.env.MONGO_USER)) {
+                print('Creating user...');
+                db.createUser({
+                  user: process.env.MONGO_USER,
+                  pwd: process.env.MONGO_PASS,
+                  roles: [
+                    { role: 'readWrite', db: process.env.MONGO_DBNAME },
+                    { role: 'readWrite', db: process.env.MONGO_DBNAME + '_stat' }
+                  ]
+                });
+              }
+{{- end }}

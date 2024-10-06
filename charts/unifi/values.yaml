@@ -1,0 +1,105 @@
+image:
+  # -- Image repository
+  repository: lscr.io/linuxserver/unifi-network-application
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  # -- Service type
+  type: LoadBalancer
+  ports:
+    # -- Port used for device communication
+    devicecom: 8080
+    # -- Port used for application GUI/API
+    webapi: 8443
+  # -- Annotations to add to the service
+  annotations: {}
+    # metallb.universe.tf/loadBalancerIPs: 192.168.1.100
+
+# -- Timezone
+timezone: "Etc/UTC"
+
+persistence:
+  # -- Enables persistence
+  enabled: true
+
+  # -- Storage class name
+  storageClass: ""
+
+  # -- Volume size
+  size: 1Gi
+
+# -- Details for accessing MongoDB.
+#    If mongodb.enabled is true, user will be created automatically.
+# @default -- See values.yaml
+database:
+  # -- Address of MongoDB server.
+  #    Ignored if mongodb.enabled is true.
+  host: ""
+
+  # -- Port of MongoDB server.
+  #    Ignored if mongodb.enabled is true.
+  port: 27017
+
+  # -- Name of MongoDB database
+  name: "unifi"
+
+  # -- Authentication source
+  authSource: "admin"
+
+  # -- Existing secret with MongoDB credentials (keys: `username`, `password`).
+  #    If provided, `username` and `password` will be ignored.
+  existingSecret: ""
+
+  # -- Username for MongoDB
+  username: "unifi"
+  # -- Password for MongoDB.
+  #    Will be automatically generated if left empty.
+  password: ""
+
+# -- Enable and configure MongoDB subchart under this key.
+#    For more options see [MongoDB chart documentation](https://github.com/bitnami/charts/tree/master/bitnami/mongodb)
+# @default -- See values.yaml
+mongodb:
+  # -- Enables MongoDB subchart.
+  #    Set this to false to use an external MongoDB.
+  enabled: true
+
+  persistence:
+    size: 1Gi
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use
+  #    If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# -- This is for setting Kubernetes Annotations to a Pod.
+podAnnotations: {}
+
+# -- This is for setting Kubernetes Labels to a Pod.
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

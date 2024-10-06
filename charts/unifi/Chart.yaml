@@ -1,0 +1,11 @@
+apiVersion: v2
+name: unifi
+description: Unifi Network Application
+type: application
+version: 0.1.0
+appVersion: "8.4.62"
+dependencies:
+  - name: mongodb
+    version: "15.6.26"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: mongodb.enabled

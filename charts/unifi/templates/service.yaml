@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "unifi.fullname" . }}
+  labels:
+    {{- include "unifi.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: devicecom
+      port: {{ .Values.service.ports.devicecom }}
+      targetPort: devicecom
+      protocol: TCP
+    - name: webapi
+      port: {{ .Values.service.ports.webapi }}
+      targetPort: webapi
+      protocol: TCP
+  selector:
+    {{- include "unifi.selectorLabels" . | nindent 4 }}
