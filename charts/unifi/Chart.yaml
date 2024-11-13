@@ -2,7 +2,7 @@ apiVersion: v2
 name: unifi
 description: Unifi Network Application
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "8.6.9"
 dependencies:
   - name: mongodb
